@@ -2,6 +2,8 @@
 
 forge script script/DeployFundMe.s.sol
 
+forge test -vvv --fork-url $SEPOLIA_RPC_URL
+
 forge test --match-test testPriceFeedVersionIsAccurate -vvv --fork-url $SEPOLIA_RPC_URL
 
 or:
