@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.19;
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import {PriceConverter} from "src/PriceConverter.sol";
@@ -10,8 +10,8 @@ error FUNDME__NotOwner();
 contract FundMe {
     using PriceConverter for uint256;
 
-    mapping(address => uint256) public addressToAmountFunded;
-    address[] public funders;
+    mapping(address => uint256) private s_addressToAmountFunded;
+    address[] public s_funders;
 
     // Could we make this constant?  /* hint: no! We should make it immutable! */
     address public /* immutable */ i_owner;
@@ -26,13 +26,10 @@ contract FundMe {
     function fund() public payable {
         require(msg.value.getConversionRate(s_priceFeed) >= MINIMUM_USD, "You need to spend more ETH!");
         // require(PriceConverter.getConversionRate(msg.value) >= MINIMUM_USD, "You need to spend more ETH!");
-        addressToAmountFunded[msg.sender] += msg.value;
-        funders.push(msg.sender);
+        s_addressToAmountFunded[msg.sender] += msg.value;
+        s_funders.push(msg.sender);
     }
     
-    function getVersion() public view returns (uint256){
-        return s_priceFeed.version();
-    }
     
     modifier onlyOwner {
         // require(msg.sender == owner);
@@ -41,17 +38,17 @@ contract FundMe {
     }
     
     function withdraw() public onlyOwner {
-        // loop thourgh the funders array
-        for (uint256 funderIndex=0; funderIndex < funders.length; funderIndex++){
+        // loop thourgh the s_funders array
+        for (uint256 funderIndex=0; funderIndex < s_funders.length; funderIndex++){
             // each time you find a funder stick it in the funder variable
-            address funder = funders[funderIndex];
+            address funder = s_funders[funderIndex];
             // below we use the funder variable as a key to the key-pair
-            // addressToAmountFunded (mapping) to set the amount that
+            // s_addressToAmountFunded (mapping) to set the amount that
             //corresponds to the specific funder to "0".
-            addressToAmountFunded[funder] = 0;
+            s_addressToAmountFunded[funder] = 0;
             // and then back up for the next iteration of the loop
         }
-        funders = new address[](0);
+        s_funders = new address[](0);
     //  There are 3 ways to transfer ether:
 
         // // 1 transfer
@@ -88,7 +85,20 @@ contract FundMe {
         fund();
     }
 
-}
+
+////////////////////////////////////////////////
+//// view and pure functions   (our getters) ///
+////////////////////////////////////////////////
+    function getVersion() external view returns (uint256){
+        return s_priceFeed.version();
+    }
+     
+    function getAddressToAmountFunded(address fundingAddress) external view returns (uint256){
+        return s_addressToAmountFunded[fundingAddress];
+    }
+    function getFunder(uint256 index) external view returns (address){
+        return s_funders[index];
+    }
 
 // Concepts we didn't cover yet (will cover in later sections)
 // 1. Enum
@@ -100,3 +110,4 @@ contract FundMe {
 // 7. Yul / Assembly
 
 
+}
