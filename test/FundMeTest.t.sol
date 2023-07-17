@@ -52,6 +52,17 @@ contract FundMeTest is StdCheats, Test {
         uint256 amountFunded = fundMe.getAddressToAmountFunded(USER);
         assertEq(amountFunded, SEND_VALUE);
     }
+
+    function testAddsFunderToArrayOfFunders() public {
+        vm.startPrank(USER); //create dummy user
+        fundMe.fund{value: SEND_VALUE}(); // have him call the fund function with the SEND_VALUE amount.
+        vm.stopPrank();
+        // we call the getFunder function which takes an index(of the funders array)
+        // and looks up the corresponding funder address and reurns it. That returned
+        // address we "catch" in the local(function) variable called funder
+        address funder = fundMe.getFunder(0);
+        assertEq(funder, USER);
+    }
     // below start bigBagBoogie's tests
 
     // function testFundersGetAddedToArray() public {
