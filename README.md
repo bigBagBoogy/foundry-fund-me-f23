@@ -35,3 +35,7 @@ git branch -M main
 git add .
 git commit -m "test added"
 git push -u origin main
+
+forge less used commands:
+
+forge inspect <nameOfContract> storageLayout

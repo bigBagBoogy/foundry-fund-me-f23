@@ -93,12 +93,16 @@ contract FundMe {
         return s_priceFeed.version();
     }
      
-    function getAddressToAmountFunded(address fundingAddress) external view returns (uint256){
+    function getAddressToAmountFunded(address fundingAddress) public view returns (uint256){
         return s_addressToAmountFunded[fundingAddress];
     }
-    function getFunder(uint256 index) external view returns (address){
+    function getFunder(uint256 index) public view returns (address){
         return s_funders[index];
     }
+
+     function getOwner() external view returns (address) {
+        return i_owner;
+ }
 
 // Concepts we didn't cover yet (will cover in later sections)
 // 1. Enum

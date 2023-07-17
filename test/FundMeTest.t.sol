@@ -30,8 +30,10 @@ contract FundMeTest is StdCheats, Test {
         assertEq(fundMe.MINIMUM_USD(), 5e18);
     }
 
+    // Below test also seems to PASS when the syntax is fundMe.i_owner
+    // but costs more gas, because you pull from storage
     function testOwnerIsMsgSender() public {
-        assertEq(fundMe.i_owner(), msg.sender);
+        assertEq(fundMe.getOwner(), msg.sender);
     }
 
     function testPriceFeedVersionIsAccurate() public {
@@ -63,6 +65,69 @@ contract FundMeTest is StdCheats, Test {
         address funder = fundMe.getFunder(0);
         assertEq(funder, USER);
     }
+
+    modifier funded() {
+        vm.prank(USER);
+        fundMe.fund{value: SEND_VALUE}();
+        assert(address(fundMe).balance > 0);
+        _;
+    }
+
+    function testOwnlyOwnerCanWithdraw() public funded {
+        vm.expectRevert();
+        fundMe.withdraw();
+    }
+
+    function testWithdrawFromASingleFunder() public funded {
+        //arrange
+        uint256 startingFundMeBalance = address(fundMe).balance; // the balance of the fundMe contract address
+        uint256 startingOwnerBalance = fundMe.getOwner().balance;
+        // vm.txGasPrice(GAS_PRICE);
+        // uint256 gasStart = gasleft();
+        // // Act
+        vm.startPrank(fundMe.getOwner());
+        fundMe.withdraw();
+        vm.stopPrank();
+
+        // uint256 gasEnd = gasleft();
+        // uint256 gasUsed = (gasStart - gasEnd) * tx.gasprice;
+
+        // Assert
+        uint256 endingFundMeBalance = address(fundMe).balance;
+        uint256 endingOwnerBalance = fundMe.getOwner().balance;
+        assertEq(endingFundMeBalance, 0);
+        assertEq(
+            startingFundMeBalance + startingOwnerBalance,
+            endingOwnerBalance // + gasUsed
+        );
+    }
+
+    function testWithdrawFromMultipleFunders() public funded {
+        //arrange
+        uint160 numberOfFunders = 10;
+        uint160 startingFunderIndex = 1;
+        for (uint160 i = startingFunderIndex; i < numberOfFunders; i++) {
+            // we have to vm.prank  some dummy-funders
+            // vm.deal     them some money
+            // but we will use hoax which is a combination of prank and deal
+            // fund the fundMe
+            hoax(address(i), SEND_VALUE);
+            fundMe.fund{value: SEND_VALUE}();
+        }
+        uint256 startingFundMeBalance = address(fundMe).balance;
+        uint256 startingOwnerBalance = fundMe.getOwner().balance;
+        ///act
+        vm.startPrank(fundMe.getOwner()); // makes sure we are calling this
+        fundMe.withdraw();
+        vm.stopPrank();
+        /// assert
+        assert(address(fundMe).balance == 0);
+        assert(
+            startingFundMeBalance + startingOwnerBalance ==
+                fundMe.getOwner().balance
+        );
+    }
+
     // below start bigBagBoogie's tests
 
     // function testFundersGetAddedToArray() public {
