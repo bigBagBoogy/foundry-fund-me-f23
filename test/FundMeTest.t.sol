@@ -29,6 +29,10 @@ contract FundMeTest is Test {
         assertEq(version, 4);
     }
 
+    function testFundFailsWithoutEnoughETH() public {
+        vm.expectRevert(); // we expect a fail 'cause we send no value.
+        fundMe.fund(); //here we call the fundMe.fund without value (no Eth)
+    }
     // below start bigBagBoogie's tests
 
     // function testFundersGetAddedToArray() public {

@@ -2,6 +2,8 @@
 
 forge script script/DeployFundMe.s.sol
 
+forge test --mt <nameOfTest> -vvv
+
 forge test -vvv --fork-url $SEPOLIA_RPC_URL
 
 forge test --match-test testPriceFeedVersionIsAccurate -vvv --fork-url $SEPOLIA_RPC_URL
@@ -31,5 +33,5 @@ git push -u origin main
 git init
 git branch -M main
 git add .
-git commit -m "first commit"
+git commit -m "test added"
 git push -u origin main
