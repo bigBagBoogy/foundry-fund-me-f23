@@ -11,7 +11,7 @@ forge test --mt testPriceFeedVersionIsAccurate -vvv --fork-url $SEPOLIA_RPC_URL
 
 source .env
 
-$echo $SEPOLIA_RPC_URL
+just for testing "source .env -> $echo $SEPOLIA_RPC_URL
 
 forge coverage --fork-url $SEPOLIA_RPC_URL
 
@@ -23,5 +23,13 @@ git init
 git branch -M main
 git add .
 git remote add origin https://github.com/bigBagBoogy/foundry-fund-me-f23.git
+git commit -m "first commit"
+git push -u origin main
+
+# instant push copy paste all below in one go:
+
+git init
+git branch -M main
+git add .
 git commit -m "first commit"
 git push -u origin main
