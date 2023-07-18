@@ -128,9 +128,22 @@ contract FundMeTest is StdCheats, Test {
         );
     }
 
-    // below start bigBagBoogie's tests
+    // below start bigBagBoogie's tests  ////////////////////////////
 
-    // function testFundersGetAddedToArray() public {
-    //     assertEq(funders.length, 0);
-    // }
+    // This first test is the same as "testAddsFunderToArrayOfFunders",
+    // however it uses hoax, does an extra step by sticking the address
+    // of the funder from funder array in a variable before doing assert
+    // and does some console logging so use -vvvv
+
+    function testFundersGetAddedToArray() public {
+        //arrange  prank a user
+        hoax(address(USER), SEND_VALUE);
+
+        //Act   user funds fundMe
+        fundMe.fund{value: SEND_VALUE}();
+        address firstlyAddedFunder = address(fundMe.s_funders(0));
+        //assert   index 0 of the funders array now = the address of the user
+        assertEq(firstlyAddedFunder, USER);
+        console.log(USER, firstlyAddedFunder);
+    }
 }
